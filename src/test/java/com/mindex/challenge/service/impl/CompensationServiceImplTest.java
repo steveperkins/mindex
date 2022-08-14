@@ -2,6 +2,7 @@ package com.mindex.challenge.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -67,6 +68,24 @@ public class CompensationServiceImplTest {
         assertNotNull("Controller returned null employee", readCompensation.getEmployee());
         assertEquals(createdEmployee.getEmployeeId(), readCompensation.getEmployee().getEmployeeId());
         assertCompensationEquivalence(createdCompensation, readCompensation);
+    }
+    
+    @Test
+    public void testEmployeeWithoutCompensation() {
+    	// Verifies the case where an employee exists but no compensation has been applied. Hopefully this would not be possible in the real world.
+    	// Create an employee
+    	Employee testEmployee = new Employee();
+    	testEmployee.setFirstName("John");
+    	testEmployee.setLastName("Doe");
+    	testEmployee.setDepartment("Engineering");
+    	testEmployee.setPosition("Developer");
+    	
+    	Employee createdEmployee = restTemplate.postForEntity(employeeCreateUrl, testEmployee, Employee.class).getBody();
+    	assertNotNull(createdEmployee.getEmployeeId());
+    	
+    	// Attempt to retrieve the new employee's nonexistent compensation
+    	Compensation readCompensation = restTemplate.getForEntity(compensationReadUrl, Compensation.class, createdEmployee.getEmployeeId()).getBody();
+    	assertNull(readCompensation, "Employee without compensation should cause null result");
     }
 
     
