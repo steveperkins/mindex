@@ -2,6 +2,7 @@ package com.mindex.challenge.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,6 +85,13 @@ public class EmployeeServiceImplTest {
         assertNotNull(structure);
         assertNotNull(structure.getEmployee());
         assertEquals(4, structure.getNumberOfReports());
+    }
+    
+    @Test
+    public void testCountReportsInvalidEmployee() {
+        // Verify the endpoint returns zero reports when an invalid employee ID is used
+        ReportingStructure structure = restTemplate.getForEntity(reportsCountUrl, ReportingStructure.class, "invalid-employee-ID").getBody();
+        assertNull("Invalid employee ID should cause null result", structure);
     }
 
     

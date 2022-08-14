@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.mindex.challenge.dao.EmployeeRepository;
 import com.mindex.challenge.data.Employee;
 import com.mindex.challenge.data.ReportingStructure;
+import com.mindex.challenge.exception.NotFoundException;
 import com.mindex.challenge.service.EmployeeService;
 
 @Service
@@ -31,13 +32,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Employee read(String id) {
+    public Employee read(String id) throws NotFoundException {
         LOG.debug("Creating employee with id [{}]", id);
 
         Employee employee = employeeRepository.findByEmployeeId(id);
 
         if (employee == null) {
-            throw new RuntimeException("Invalid employeeId: " + id);
+            throw new NotFoundException("Invalid employee ID: " + id);
         }
 
         return employee;
@@ -51,8 +52,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 	@Override
-	public ReportingStructure countReports(String employeeId) {
+	public ReportingStructure countReports(String employeeId) throws NotFoundException {
 		Employee employee = employeeRepository.findByEmployeeId(employeeId);
+		if (null == employee) {
+			throw new NotFoundException("Invalid employee ID: " + employeeId);
+		}
+		
 		ReportingStructure structure = new ReportingStructure();
 		structure.setEmployee(employee);
 		structure.setNumberOfReports(countReports(employee.getDirectReports()));

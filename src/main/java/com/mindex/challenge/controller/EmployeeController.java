@@ -3,6 +3,7 @@ package com.mindex.challenge.controller;
 import com.mindex.challenge.data.Compensation;
 import com.mindex.challenge.data.Employee;
 import com.mindex.challenge.data.ReportingStructure;
+import com.mindex.challenge.exception.NotFoundException;
 import com.mindex.challenge.service.CompensationService;
 import com.mindex.challenge.service.EmployeeService;
 import org.slf4j.Logger;
@@ -31,7 +32,12 @@ public class EmployeeController {
     public Employee read(@PathVariable String id) {
         LOG.debug("Received employee create request for id [{}]", id);
 
-        return employeeService.read(id);
+        try {
+        	return employeeService.read(id);
+        } catch (NotFoundException e) {
+        	LOG.error("Could not retrieve employee", e);
+        	return null;
+        }
     }
 
     @PutMapping("/employee/{id}")
@@ -46,7 +52,12 @@ public class EmployeeController {
     public ReportingStructure getReportCount(@PathVariable String id) {
         LOG.debug("Received employee report count request for id [{}]", id);
 
-        return employeeService.countReports(id);
+        try {
+        	return employeeService.countReports(id);
+        } catch (NotFoundException e) {
+        	LOG.error("Could not retrieve employee report count for ID " + id, e);
+        	return null;
+        }
     }
     
     @PostMapping("/employee/{id}/compensation")
@@ -54,8 +65,10 @@ public class EmployeeController {
         LOG.debug("Received compensation create request for [{}]", compensation);
         if (null == compensation.getEmployee()) {
         	Employee employee = new Employee();
-        	employee.setEmployeeId(id);
         	compensation.setEmployee(employee);
+        }
+        if (null == compensation.getEmployee().getEmployeeId()) {
+        	compensation.getEmployee().setEmployeeId(id);
         }
 
         return compensationService.create(compensation);
